@@ -5,6 +5,11 @@ var app = angular.module("superfire");
 app.factory("playerService", function($firebaseArray) {
     var service = {};
 
+    service.playerProperties = {
+        width: 30,
+        height:30
+    };
+
     var ref = new Firebase(_fireBaseDB + '/players');
     service.players = $firebaseArray(ref);
 
@@ -27,14 +32,10 @@ app.factory("playerService", function($firebaseArray) {
 });
 
 
-app.factory("canvasService", function($interval, playerService) {
+app.factory("canvasService", function(playerService, wallsService) {
     var service = {};
 
     var draw_frequency = 1;
-    var playerProperties = {
-        width: 30,
-        height:30
-    };
 
     var canvas = document.getElementById("canvas").getContext('2d');
 
@@ -47,9 +48,22 @@ app.factory("canvasService", function($interval, playerService) {
         service.clearCanvas();
         angular.forEach(playerService.players, function(player){
             canvas.fillStyle=player.color;
-            canvas.fillRect(player.position.x, player.position.y, playerProperties.width, playerProperties.height);
+            canvas.fillRect(player.position.x, player.position.y, playerService.playerProperties.width, playerService.playerProperties.height);
+        });
+        angular.forEach(wallsService.walls, function(wall){
+            canvas.fillStyle='black';
+            canvas.fillRect(wall.x, wall.y, wall.width, wall.height);
         });
     };
+
+    return service;
+});
+
+app.factory("wallsService", function($firebaseArray) {
+    var service = {};
+
+    var ref = new Firebase(_fireBaseDB + '/walls');
+    service.walls = $firebaseArray(ref);
 
     return service;
 });
